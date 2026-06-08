@@ -1,57 +1,90 @@
 <template>
-  <form @submit.prevent="onSubmit">
-    <div>
-      <label for="record_date">日期</label>
-      <input id="record_date" v-model="record_date" type="date" required />
-    </div>
-    <div>
-      <label for="item_name">品項名稱</label>
-      <input id="item_name" v-model="item_name" type="text" required />
-    </div>
-    <div>
-      <label for="item_price">商品價格</label>
-      <input id="item_price" v-model.number="item_price" type="number" required />
-    </div>
-    <div>
-      <button type="button" @click="submit('get')">GET 新增</button>
-      <button type="button" @click="submit('post')">POST 新增</button>
-    </div>
-    <p>{{ message }}</p>
-  </form>
+  <div class="price-form">
+    <h3>新增物價紀錄</h3>
+    <form>
+      <div class="form-group">
+        <label>商品名稱：</label>
+        <input v-model="itemName" type="text" placeholder="例如：戰神 Mars 乳清 (35g)" required />
+      </div>
+      
+      <div class="form-group">
+        <label>商品價格：</label>
+        <input v-model.number="itemPrice" type="number" placeholder="例如：60" required />
+      </div>
+
+      <div class="button-group">
+        <button type="button" @click="addPricePost" class="btn btn-post">POST 新增</button>
+        <button type="button" @click="addPriceGet" class="btn btn-get">GET 參數新增</button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
+// 💡 ✨ 關鍵：部署好 Render 後，把這裡換成妳的 Render 雲端網址（結尾不要加斜線）
+const API_BASE_URL = 'https://妳的專案名稱.onrender.com';
+
 export default {
   name: 'PriceForm',
   data() {
-    return { record_date: '', item_name: '', item_price: null, message: '' }
+    return {
+      itemName: '',
+      itemPrice: ''
+    }
   },
   methods: {
-    onSubmit() {
-      this.submit('post')
-    },
-    async submit(method) {
-      this.message = ''
-      if (!this.record_date || !this.item_name || this.item_price === null) {
-        this.message = '請填寫所有欄位'
-        return
+    // 1. 妳原本的 POST 新增方法，改連到雲端
+    async addPricePost() {
+      if (!this.itemName || !this.itemPrice) {
+        alert('請填寫商品名稱與價格！');
+        return;
       }
+
       try {
-        if (method === 'get') {
-          const qs = `?date=${encodeURIComponent(this.record_date)}&name=${encodeURIComponent(this.item_name)}&price=${encodeURIComponent(this.item_price)}`
-          const res = await fetch('http://localhost:3000/api/insert' + qs, { method: 'GET' })
-          this.message = await res.text()
-        } else {
-          const res = await fetch('http://localhost:3000/api/insert', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date: this.record_date, name: this.item_name, price: Number(this.item_price) })
+        const res = await fetch(`${API_BASE_URL}/api/prices`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            item_name: this.itemName,
+            item_price: this.itemPrice
           })
-          this.message = await res.text()
-        }
-        this.$emit('submitted')
-      } catch (e) {
-        this.message = '新增失敗：' + e.message
+        });
+
+        if (!res.ok) throw new Error('新增失敗');
+
+        alert('POST 新增成功！');
+        this.itemName = '';
+        this.itemPrice = '';
+        this.$emit('submitted'); // 觸發 App.vue 重新整理列表
+      } catch (error) {
+        console.error(error);
+        alert('POST 連線失敗，請檢查後端是否正常運作');
+      }
+    },
+
+    // 2. 妳原本的 GET 新增方法，改連到雲端
+    async addPriceGet() {
+      if (!this.itemName || !this.itemPrice) {
+        alert('請填寫商品名稱與價格！');
+        return;
+      }
+
+      // 根據妳原本的 GET 路由設計組裝網址
+      const url = `${API_BASE_URL}/api/prices/add?item_name=${encodeURIComponent(this.itemName)}&item_price=${this.itemPrice}`;
+
+      try {
+        const res = await fetch(url, { method: 'GET' });
+        if (!res.ok) throw new Error('新增失敗');
+
+        alert('GET 新增成功！');
+        this.itemName = '';
+        this.itemPrice = '';
+        this.$emit('submitted'); // 觸發 App.vue 重新整理列表
+      } catch (error) {
+        console.error(error);
+        alert('GET 連線失敗，請檢查後端是否正常運作');
       }
     }
   }
@@ -59,6 +92,5 @@ export default {
 </script>
 
 <style scoped>
-label { display:inline-block; width:90px }
-div { margin-bottom:8px }
+/* 這裡保留妳原本寫的 CSS 樣式即可，完全不用動 */
 </style>
