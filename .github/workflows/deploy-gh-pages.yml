@@ -1,11 +1,36 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+name: Build and Deploy to gh-pages
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  base: '/hw5/', // 確保子路徑正確
-  plugins: [vue()],
-  build: {
-    outDir: 'dist', // 🛠️ 強制指定打包出來的資料夾名稱叫做 dist
-  }
-})
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
