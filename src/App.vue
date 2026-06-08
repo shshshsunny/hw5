@@ -24,12 +24,11 @@ export default {
     }
   },
   methods: {
-    // 讀取資料的方法
     loadPrices() {
-      // 從瀏覽器的儲存空間拿資料
+      // 1. 直接讀取瀏覽器儲存空間
       let localData = localStorage.getItem('protein_tracker_data')
       
-      // 如果第一次打開，裡面空空的，就自動把妳的歷史紀錄載入進去
+      // 2. 如果是第一次打開，就把所有的歷史紀錄預載進去！
       if (!localData) {
         const defaultData = this.generateDefaultData()
         localStorage.setItem('protein_tracker_data', JSON.stringify(defaultData))
@@ -39,24 +38,28 @@ export default {
       }
     },
     
-    // 這裡放妳原本 reset_data.js 裡面的歷史物價紀錄
+    // 🎯 這裡完整還原了妳最後一張截圖的所有資料庫內容
     generateDefaultData() {
-      const years = [2016, 2018, 2020, 2022, 2024, 2026]
-      const marsPrices = [25, 30, 35, 45, 50, 60]
-      const chickenPrices = [45, 49, 55, 59, 69, 79]
-      const sampleData = []
-      
-      // 倒序排列，讓最新的 2026 年排在最上面
-      for (let i = years.length - 1; i >= 0; i--) {
-        const date = `${years[i]}-05-08`
-        sampleData.push({ record_date: date, item_name: '超商即食雞胸肉 (180g)', item_price: chickenPrices[i] })
-        sampleData.push({ record_date: date, item_name: '戰神 Mars 乳清 (35g)', item_price: marsPrices[i] })
-      }
-      return sampleData
+      return [
+        { record_date: '2026-05-12', item_name: 'aaaa', item_price: 77 },
+        { record_date: '2026-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 60 },
+        { record_date: '2026-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 79 },
+        { record_date: '2026-05-08', item_name: '能量棒', item_price: 45 },
+        { record_date: '2026-05-05', item_name: 'fff', item_price: 66 },
+        { record_date: '2024-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 50 },
+        { record_date: '2024-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 69 },
+        { record_date: '2022-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 45 },
+        { record_date: '2022-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 59 },
+        { record_date: '2020-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 35 },
+        { record_date: '2020-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 55 },
+        { record_date: '2018-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 30 },
+        { record_date: '2018-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 49 },
+        { record_date: '2016-05-08', item_name: '戰神 Mars 乳清 (35g)', item_price: 25 },
+        { record_date: '2016-05-08', item_name: '超商即食雞胸肉 (180g)', item_price: 45 }
+      ]
     }
   },
   mounted() {
-    // 網頁一打開，立刻載入紀錄
     this.loadPrices()
   }
 }
