@@ -24,7 +24,7 @@ export default {
   methods: {
     async loadPrices() {
       try {
-        const res = await fetch('http://localhost:3000/api/prices')
+        const res = await fetch('https://hw5-backend-xyz.onrender.com/api/prices')
         if (!res.ok) throw new Error(res.status)
         this.items = await res.json()
       } catch (e) {
